@@ -1,3 +1,9 @@
+/*
+ *#####################################
+ *#     Written by Dalton Nofs        #
+ *#####################################
+*/
+
 package mob_inv_pkg;
 
 import java.io.BufferedReader;
@@ -7,13 +13,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Map;
 //import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
+//import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 //import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
@@ -42,7 +50,7 @@ public class mob_inv_main extends JavaPlugin
     	{
     		sender.sendMessage((getDataFolder() + " saved_invs"));
     		//Bukkit.broadcastMessage(mob_inv_listner.mob_invs.get(0).toString());
-    		Bukkit.broadcastMessage(Integer.toString(mob_inv_listner.mob_invs.size()));
+    		//Bukkit.broadcastMessage(Integer.toString(mob_inv_listner.mob_invs.size()));
     		load_arrays();
     	}
     	else{}
@@ -79,11 +87,23 @@ public class mob_inv_main extends JavaPlugin
 		        			//now to create an itemstack and assign stored values
 		        			ItemStack temp_stack = new ItemStack(Material.getMaterial(temp_split_str_split[0]));
 		        			temp_stack.setAmount(Integer.parseInt(temp_split_str_split[1]));
-		        			temp_stack.setDurability(Short.parseShort(temp_split_str_split[2])); 
-		        			//temp_stack.addEnchantments(temp_split_str_split[3]);
-							//ItemMeta temp_item_meta = temp_stack.getItemMeta();
-		        			//temp_item_meta.setLore(((List<String>)temp_split_str_split[3])));
-		        			//temp_stack.setItemMeta(temp_item_meta);
+		        			temp_stack.setDurability(Short.parseShort(temp_split_str_split[2]));
+		        			//Bukkit.broadcastMessage(String.valueOf(temp_split_str_split.length));
+		        			//Bukkit.broadcastMessage(String.valueOf(temp_split_str_split[1] + " " + temp_split_str_split[2] + " " + temp_split_str_split[3]));
+		        			//Bukkit.broadcastMessage(temp_split_str_split[3].toString());
+		        			if(Integer.parseInt(temp_split_str_split[3]) == 1)
+		        			{
+		        				//Bukkit.broadcastMessage(String.valueOf(temp_split_str_split[4]));
+		        				String[] temp_enchant_string = temp_split_str_split[4].split(":");
+			        			for(String enchant_split : temp_enchant_string)
+			        			{
+			        				String[] enchant_split_split = enchant_split.split(",");
+			        				temp_stack.addEnchantment(Enchantment.getByName(enchant_split_split[0]), Integer.parseInt(enchant_split_split[1]));
+			        				//Bukkit.broadcastMessage(enchant_split_split[0] + " " + enchant_split_split[1]);
+			        			}
+		        			}
+		        			else{}
+		        			//Bukkit.broadcastMessage("adding temp_stack");
 		        			temp_list.add(temp_stack);
 	        			}
 	        			else{o++;}
@@ -182,7 +202,32 @@ public class mob_inv_main extends JavaPlugin
     				{
     					temp_ench += k.toString() + " ";
     				}*/
-    				temp_string += j.getType().toString() + ";" + j.getAmount() + ";" + j.getDurability() + " ";	
+    				String enchant_string = "";
+    				Map<Enchantment, Integer> temp_enchant_map = j.getEnchantments();
+    				boolean first_time = true;
+    				String enchant_bool = "0";
+    				if(temp_enchant_map.isEmpty())
+    				{
+    					//Bukkit.broadcastMessage("EMPTY");
+    					//dont do this if empty
+    				}
+    				else
+    				{
+	    				for(Enchantment temp_enchantment : temp_enchant_map.keySet())
+	    				{
+	    					if(first_time == true)
+	    					{
+	    						enchant_string = enchant_string + temp_enchantment.getName() + "," + j.getEnchantmentLevel(Enchantment.getByName(temp_enchantment.getName()));
+	    						first_time = false;
+	    					}
+	    					else
+	    					{
+	    						enchant_string = enchant_string + ":" + temp_enchantment.getName() + "," + j.getEnchantmentLevel(Enchantment.getByName(temp_enchantment.getName()));
+	    					}
+	    				}
+	    				enchant_bool = "1";
+    				}
+    				temp_string += j.getType().toString() + ";" + j.getAmount() + ";" + j.getDurability() + ";" + enchant_bool + ";" + enchant_string + " ";// + j.getEnchantments(). + " ";	
     			}
     			else{}
     		}
@@ -201,7 +246,7 @@ public class mob_inv_main extends JavaPlugin
         		{
         			if(j!= null)
         			{
-        				temp_string += j.getType().toString() + ";" + j.getAmount() + ";" + j.getDurability() + " ";	
+        				temp_string += j.getType().toString() + ";" + j.getAmount() + ";" + j.getDurability() + ";" + j.getEnchantments() + " ";	
         			}
         			else{}
         		}
